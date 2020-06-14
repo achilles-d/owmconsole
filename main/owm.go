@@ -33,13 +33,21 @@ func main() {
 		fmt.Printf("An error occurred while contacting OpenWeatherMap.\n%s", respErr.Error())
 		return
 	}
-	currentWeather := new(CurrentWeatherInfo)
-	decodeErr := json.NewDecoder(resp.Body).Decode(currentWeather)
+	dispCurrentForecast(resp)
+}
+
+func dispCurrentForecast(resp *http.Response) {
+	weather := new(CurrentWeatherInfo)
+	decodeErr := json.NewDecoder(resp.Body).Decode(weather)
 	if decodeErr != nil {
 		fmt.Printf("An error occured while processing forecast data.\n%s\n", decodeErr.Error())
 		return
 	}
-	fmt.Printf("-- Location --\n%s\n", currentWeather.City)
-	fmt.Printf("-- Forecast --\n%s\n", currentWeather.Description[0].Detail)
-	fmt.Printf("Current temperature: %f°F\n", currentWeather.CurrentTempInfo["temp"])
+	fmt.Printf("-- Location --\n%s\n", weather.City)
+	fmt.Printf("-- Forecast --\n%s\n", weather.Description[0].Detail)
+	fmt.Printf("Current temperature: %s\n", formatTemp(weather.CurrentTempInfo["temp"].(float64)))
+}
+
+func formatTemp(temp float64) string {
+	return fmt.Sprintf("%d°F", int(temp))
 }
