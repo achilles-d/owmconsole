@@ -25,9 +25,7 @@ type CurrentDescription struct {
 }
 
 func main() {
-	zipCode := flag.String("zip", "10001", "US ZIP code")
-	tempExtreme := flag.String("extreme", "", "High or low temp for location")
-	flag.Parse()
+	zipCode, tempExtreme := initFlags()
 	url := fmt.Sprintf("%s%s%s%s%s", urlPrefix, *zipCode, apiKeyPrefix, apiKey, unitsSuffix)
 	resp, respErr := http.Get(url)
 	if respErr != nil {
@@ -35,6 +33,13 @@ func main() {
 		return
 	}
 	dispCurrentForecast(resp, *tempExtreme)
+}
+
+func initFlags() (*string, *string) {
+	zipCode := flag.String("zip", "10001", "US ZIP code")
+	tempExtreme := flag.String("extreme", "", "High or low temp for location")
+	flag.Parse()
+	return zipCode, tempExtreme
 }
 
 func dispCurrentForecast(resp *http.Response, tempExtreme string) {
