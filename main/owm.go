@@ -25,18 +25,19 @@ type CurrentDescription struct {
 }
 
 func main() {
-	zipCode := *flag.String("zip", "10001", "US ZIP code")
+	zipCode := flag.String("zip", "10001", "US ZIP code")
+	tempExtreme := flag.String("extreme", "", "High or low temp for location")
 	flag.Parse()
-	url := fmt.Sprintf("%s%s%s%s%s", urlPrefix, zipCode, apiKeyPrefix, apiKey, unitsSuffix)
+	url := fmt.Sprintf("%s%s%s%s%s", urlPrefix, *zipCode, apiKeyPrefix, apiKey, unitsSuffix)
 	resp, respErr := http.Get(url)
 	if respErr != nil {
 		fmt.Printf("An error occurred while contacting OpenWeatherMap.\n%s", respErr.Error())
 		return
 	}
-	dispCurrentForecast(resp)
+	dispCurrentForecast(resp, *tempExtreme)
 }
 
-func dispCurrentForecast(resp *http.Response) {
+func dispCurrentForecast(resp *http.Response, tempExtreme string) {
 	weather := new(CurrentWeatherInfo)
 	decodeErr := json.NewDecoder(resp.Body).Decode(weather)
 	if decodeErr != nil {
@@ -44,8 +45,19 @@ func dispCurrentForecast(resp *http.Response) {
 		return
 	}
 	fmt.Printf("-- Location --\n%s\n", weather.City)
-	fmt.Printf("-- Forecast --\n%s\n", weather.Description[0].Detail)
+	fmt.Printf("-- Today's Forecast --\n%s\n", weather.Description[0].Detail)
 	fmt.Printf("Current temperature: %s\n", formatTemp(weather.CurrentTempInfo["temp"].(float64)))
+	dispCurrentExtreme(weather, tempExtreme)
+}
+
+func dispCurrentExtreme(weather *CurrentWeatherInfo, tempExtreme string) {
+	if tempExtreme == "" {
+		return
+	} else if tempExtreme == "high" {
+		fmt.Printf("High temperature: %s\n", formatTemp(weather.CurrentTempInfo["temp_max"].(float64)))
+	} else if tempExtreme == "low" {
+		fmt.Printf("Low temperature: %s\n", formatTemp(weather.CurrentTempInfo["temp_min"].(float64)))
+	}
 }
 
 func formatTemp(temp float64) string {
