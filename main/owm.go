@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 const (
@@ -26,6 +29,7 @@ type CurrentDescription struct {
 
 func main() {
 	zipCode, tempExtreme := initFlags()
+	*zipCode = correctZip(*zipCode)
 	url := fmt.Sprintf("%s%s%s%s%s", urlPrefix, *zipCode, apiKeyPrefix, apiKey, unitsSuffix)
 	resp, respErr := http.Get(url)
 	if respErr != nil {
@@ -40,6 +44,17 @@ func initFlags() (*string, *string) {
 	tempExtreme := flag.String("extreme", "", "High or low temp for location")
 	flag.Parse()
 	return zipCode, tempExtreme
+}
+
+func correctZip(zipCode string) string {
+	zipInt, convErr := strconv.Atoi(zipCode)
+	reader := bufio.NewReader(os.Stdin)
+	for (zipInt < 501) || (zipInt > 99950) || (len(zipCode) != 5) || (convErr != nil) {
+		fmt.Println("You entered an incorrect zip code. Please try again.")
+		zipCode, _ := reader.ReadString('\n')
+		zipInt, convErr = strconv.Atoi(zipCode)
+	}
+	return zipCode
 }
 
 func dispCurrentForecast(resp *http.Response, tempExtreme string) {
