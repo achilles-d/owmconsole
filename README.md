@@ -3,7 +3,7 @@
 ### /main/owm.go
 * Displays current weather information for a given US ZIP code supported by OpenWeatherMap.
 #### Usage 
-The following commands assume the the working directory is /openweathermapconsole/main.
+The following commands assume the the working directory is /owmconsole/main.
 ##### Build
 ````
 go build main.go
